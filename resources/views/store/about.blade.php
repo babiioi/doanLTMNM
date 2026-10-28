@@ -1,0 +1,6 @@
+@extends('layouts.store')
+@section('title', 'Giới thiệu - Fashion Store')
+@section('content')
+<section class="rounded-4 p-4 p-md-5 mb-4 text-white" style="background:linear-gradient(120deg,#45352e,#9b7563)"><p class="text-uppercase small mb-2">About us</p><h1 class="display-5 fw-bold">Về Fashion Store</h1><p class="mb-0">Phong cách của riêng bạn bắt đầu từ những lựa chọn phù hợp.</p></section>
+<div class="row g-4 align-items-center"><div class="col-lg-7"><h2 class="h3">Câu chuyện của chúng tôi</h2><p>Fashion Store là cửa hàng thời trang trực tuyến giúp khách hàng dễ dàng khám phá và lựa chọn trang phục phù hợp với phong cách hằng ngày.</p><p>Chúng tôi hướng đến trải nghiệm mua sắm đơn giản: tìm kiếm thuận tiện, thông tin sản phẩm rõ ràng và đặt hàng trực tuyến dễ dàng.</p><h2 class="h4 mt-4">Điều chúng tôi hướng đến</h2><ul><li>Thông tin sản phẩm rõ ràng.</li><li>Trải nghiệm mua sắm dễ sử dụng.</li><li>Không ngừng cải thiện chất lượng phục vụ.</li></ul><a href="{{ route('store.products.index') }}" class="btn btn-dark mt-2">Khám phá sản phẩm</a></div><div class="col-lg-5"><div class="rounded-4 p-5 text-center" style="background:#eee"><div class="display-1">F</div><h3 class="h4">FASHION STORE</h3><p class="text-secondary mb-0">Phong cách dành riêng cho bạn</p></div></div></div>
+@endsection
