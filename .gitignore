@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+!/storage/
+ /storage/*
+!/storage/app/
+/storage/app/*
+!/storage/app/public/
+/storage/app/public/*
+!/storage/app/public/banners/
+!/storage/app/public/banners/**
+!/storage/app/public/products/
+!/storage/app/public/products/**
