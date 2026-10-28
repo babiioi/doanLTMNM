@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StorefrontController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [StorefrontController::class, 'index'])->name('store.home');
@@ -23,6 +24,14 @@ Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.u
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
     Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
