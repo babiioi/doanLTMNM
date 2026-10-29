@@ -32,11 +32,30 @@ Route::middleware('auth')->group(function () {
 
     Route::delete('/profile', [ProfileController::class, 'destroy'])
         ->name('profile.destroy');
-    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
-    Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store');
-    Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
-    Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-});
+    Route::get('/checkout', [CheckoutController::class, 'index'])
+    ->name('checkout.index');
+    
+    Route::post('/checkout/save-shipping-info', [CheckoutController::class, 'saveShippingInfo'])
+    ->name('checkout.save-shipping-info');
+
+    Route::post('/checkout', [CheckoutController::class, 'store'])
+        ->name('checkout.store');
+
+    // API địa chỉ và phí vận chuyển GHN
+    Route::get('/checkout/ghn/provinces', [CheckoutController::class, 'provinces'])
+        ->name('checkout.ghn.provinces');
+
+    Route::get('/checkout/ghn/districts/{provinceId}', [CheckoutController::class, 'districts'])
+        ->name('checkout.ghn.districts');
+
+    Route::get('/checkout/ghn/wards/{districtId}', [CheckoutController::class, 'wards'])
+        ->name('checkout.ghn.wards');
+
+    Route::post('/checkout/ghn/fee', [CheckoutController::class, 'shippingFee'])
+        ->name('checkout.ghn.fee');
+        Route::get('/my-orders', [OrderController::class, 'index'])->name('orders.index');
+        Route::get('/my-orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+    });
 
 Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
