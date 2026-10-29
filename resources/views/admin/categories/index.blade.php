@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="h3">Danh mục</h1>
+    <h1 class="page-heading mb-0">Danh mục</h1>
     <a class="btn btn-dark" href="{{ route('admin.categories.create') }}">
         + Thêm danh mục
     </a>

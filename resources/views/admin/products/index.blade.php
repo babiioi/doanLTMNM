@@ -173,51 +173,51 @@
     /* # */
     .product-table th:nth-child(1),
     .product-table td:nth-child(1) {
-        width: 4%;
+        width: 4% !important;
     }
 
     /* Ảnh */
     .product-table th:nth-child(2),
     .product-table td:nth-child(2) {
-        width: 11%;
+        width: 11% !important;
     }
 
     /* Tên sản phẩm */
     .product-table th:nth-child(3),
     .product-table td:nth-child(3) {
-        width: 12%;
+        width: 12% !important;
     }
 
     /* Danh mục */
     .product-table th:nth-child(4),
     .product-table td:nth-child(4) {
-        width: 19%;
+        width: 19% !important;
     }
 
     /* Bộ sưu tập */
     .product-table th:nth-child(5),
     .product-table td:nth-child(5) {
-        width: 18%;
+        width: 18% !important;
     }
 
     /* Giá */
     .product-table th:nth-child(6),
     .product-table td:nth-child(6) {
-        width: 13%;
+        width: 13% !important;
         white-space: nowrap;
     }
 
     /* Tồn kho */
     .product-table th:nth-child(7),
     .product-table td:nth-child(7) {
-        width: 8%;
+        width: 8% !important;
         white-space: nowrap;
     }
 
     /* Thao tác */
     .product-table th:nth-child(8),
     .product-table td:nth-child(8) {
-        width: 15%;
+        width: 15% !important;
         white-space: nowrap;
     }
 
@@ -248,6 +248,5 @@
         align-items: center;
         justify-content: center;
     }
-    !important
 </style>
 @endsection
