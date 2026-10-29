@@ -1,103 +1,179 @@
 
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            Quản trị cửa hàng thời trang
-        </h2>
-    </x-slot>
+@extends('admin.layouts.main')
 
-    <div class="py-8" style="background: #f3f4f6; min-height: 80vh;">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+@section('title', 'Tổng quan quản trị')
 
-            <h3 class="text-2xl font-bold text-gray-800 mb-2">
-                Tổng quan cửa hàng
-            </h3>
+@section('content')
 
-            <p class="text-gray-500 mb-6">
-                Chào mừng bạn đến với hệ thống quản lý cửa hàng thời trang.
-            </p>
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-4">
+    <div>
+        <h2 class="page-heading">Tổng quan</h2>
+        <p class="page-subtitle mb-0">
+            Theo dõi tình hình hoạt động của Fashion Store.
+        </p>
+    </div>
+    <span class="text-secondary small">
+        <i class="bi bi-calendar3"></i>
+        {{ now()->format('d/m/Y') }}
+    </span>
+</div>
 
-            {{-- Thống kê --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+{{-- 4 thẻ thống kê --}}
+<div class="row g-4 mb-4">
 
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <p class="text-gray-500 text-sm">Danh mục</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">
-                        {{ $categoryCount }}
-                    </h3>
-                    <a href="{{ route('admin.categories.index') }}"
-                       class="text-sm text-blue-600 mt-4 inline-block">
-                        Quản lý danh mục →
-                    </a>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <p class="text-gray-500 text-sm">Sản phẩm</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">
-                        {{ $productCount }}
-                    </h3>
-                    <a href="{{ route('admin.products.index') }}"
-                       class="text-sm text-blue-600 mt-4 inline-block">
-                        Quản lý sản phẩm →
-                    </a>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <p class="text-gray-500 text-sm">Tổng đơn hàng</p>
-                    <h3 class="text-3xl font-bold text-gray-800 mt-2">
-                        {{ $orderCount }}
-                    </h3>
-                    <a href="{{ route('admin.orders.index') }}"
-                       class="text-sm text-blue-600 mt-4 inline-block">
-                        Quản lý đơn hàng →
-                    </a>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <p class="text-gray-500 text-sm">Đơn chờ xử lý</p>
-                    <h3 class="text-3xl font-bold text-orange-500 mt-2">
-                        {{ $pendingOrderCount }}
-                    </h3>
-                    <a href="{{ route('admin.orders.index') }}"
-                       class="text-sm text-blue-600 mt-4 inline-block">
-                        Kiểm tra đơn hàng →
-                    </a>
-                </div>
-
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-title">Tổng sản phẩm</span>
+                <span class="stat-icon" style="background:#eeedff;color:#7167f9">▣</span>
             </div>
-
-            {{-- Truy cập nhanh --}}
-            <div class="bg-white rounded-xl shadow-sm border p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4">
-                    Truy cập nhanh
-                </h3>
-
-                <div class="flex flex-wrap gap-3">
-                    <a href="{{ route('admin.products.index') }}"
-                       class="px-5 py-3 rounded-lg text-white"
-                       style="background: #4b5563;">
-                        + Thêm sản phẩm
-                    </a>
-
-                    <a href="{{ route('admin.categories.index') }}"
-                       class="px-5 py-3 rounded-lg text-white"
-                       style="background: #6b7280;">
-                        + Quản lý danh mục
-                    </a>
-
-                    <a href="{{ route('admin.orders.index') }}"
-                       class="px-5 py-3 rounded-lg text-white"
-                       style="background: #374151;">
-                        Xem đơn hàng
-                    </a>
-
-                    <a href="{{ route('store.home') }}"
-                       class="px-5 py-3 rounded-lg border text-gray-700">
-                        Xem cửa hàng
-                    </a>
-                </div>
-            </div>
-
+            <div class="stat-number">{{ number_format($productCount) }}</div>
+            <a class="stat-link" href="{{ route('admin.products.index') }}">
+                Quản lý sản phẩm →
+            </a>
         </div>
     </div>
-</x-app-layout>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-title">Tổng bộ sưu tập</span>
+                <span class="stat-icon" style="background:#e5f8f0;color:#20a779">▤</span>
+            </div>
+            <div class="stat-number">{{ number_format($collectionCount) }}</div>
+            <a class="stat-link" href="{{ route('admin.collections.index') }}">
+                Quản lý bộ sưu tập →
+            </a>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-title">Tổng đơn hàng</span>
+                <span class="stat-icon" style="background:#fff1df;color:#e99a32">▧</span>
+            </div>
+            <div class="stat-number">{{ number_format($orderCount) }}</div>
+            <a class="stat-link" href="{{ route('admin.orders.index') }}">
+                Quản lý đơn hàng →
+            </a>
+        </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-xl-3">
+        <div class="stat-card">
+            <div class="d-flex justify-content-between align-items-center">
+                <span class="stat-title">Tổng doanh thu</span>
+                <span class="stat-icon" style="background:#ffe8ed;color:#e45d7a">₫</span>
+            </div>
+            <div class="stat-number" style="font-size:25px">
+                {{ number_format($totalRevenue, 0, ',', '.') }}
+                <span style="font-size:14px">₫</span>
+            </div>
+            <span class="text-secondary small">Từ đơn hàng hoàn thành</span>
+        </div>
+    </div>
+
+</div>
+
+{{-- Biểu đồ doanh thu --}}
+<div class="content-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h5 class="mb-1">Doanh thu theo thời gian</h5>
+            <p class="text-secondary small mb-0">
+                Thống kê doanh thu 6 tháng gần nhất
+            </p>
+        </div>
+        <span class="badge rounded-pill px-3 py-2"
+              style="background:#eeedff;color:#7167f9">
+            6 tháng
+        </span>
+    </div>
+
+    <div style="height:320px; position:relative;">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</div>
+
+<style>
+    .stat-icon {
+        width: 43px;
+        height: 43px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 23px;
+        font-weight: 700;
+    }
+
+    .stat-card {
+        transition: transform .2s, box-shadow .2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px #25294910;
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const revenueCanvas = document.getElementById('revenueChart');
+
+    new Chart(revenueCanvas, {
+        type: 'line',
+        data: {
+            labels: @json($revenueLabels),
+            datasets: [{
+                label: 'Doanh thu',
+                data: @json($revenueData),
+                borderColor: '#7167f9',
+                backgroundColor: 'rgba(113, 103, 249, 0.12)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                pointBackgroundColor: '#7167f9'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                intersect: false,
+                mode: 'index'
+            },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return 'Doanh thu: ' +
+                                new Intl.NumberFormat('vi-VN').format(context.raw) + ' ₫';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f0f1f6' },
+                    ticks: {
+                        callback: function(value) {
+                            return new Intl.NumberFormat('vi-VN', {
+                                notation: 'compact'
+                            }).format(value) + ' ₫';
+                        }
+                    }
+                },
+                x: {
+                    grid: { display: false }
+                }
+            }
+        }
+    });
+</script>
+
+@endsection

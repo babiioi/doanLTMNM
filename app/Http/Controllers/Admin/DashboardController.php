@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Models\Collection;
 use App\Models\Order;
 use App\Models\Product;
 
@@ -11,16 +11,36 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        $categoryCount = Category::count();
         $productCount = Product::count();
+        $collectionCount = Collection::count();
         $orderCount = Order::count();
-        $pendingOrderCount = Order::where('status', 'pending')->count();
+
+        $totalRevenue = Order::where('status', 'completed')
+            ->sum('total');
+
+        $revenueLabels = [];
+        $revenueData = [];
+
+        foreach (range(5, 0) as $i) {
+            $month = now()->startOfMonth()->subMonths($i);
+
+            $revenueLabels[] = 'T' . $month->format('m/Y');
+
+            $revenueData[] = (float) Order::where('status', 'completed')
+                ->whereBetween('created_at', [
+                    $month->copy()->startOfMonth(),
+                    $month->copy()->endOfMonth(),
+                ])
+                ->sum('total');
+        }
 
         return view('admin.dashboard', compact(
-            'categoryCount',
             'productCount',
+            'collectionCount',
             'orderCount',
-            'pendingOrderCount'
+            'totalRevenue',
+            'revenueLabels',
+            'revenueData'
         ));
     }
 }
