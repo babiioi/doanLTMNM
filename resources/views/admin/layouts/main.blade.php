@@ -459,6 +459,11 @@
             <span class="side-icon">▣</span> Đơn hàng
         </a>
 
+        <a class="side-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}"
+        href="{{ route('admin.contact-messages.index') }}">
+            <span class="side-icon">✉</span> Góp ý khách hàng
+        </a>
+
         <div class="menu-label">CỬA HÀNG</div>
 
         <a class="side-link" href="{{ route('store.home') }}">

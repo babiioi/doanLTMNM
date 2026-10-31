@@ -12,6 +12,8 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StorefrontController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ContactController;
+use App\Http\Controllers\Admin\ContactMessageController;
 
 Route::get('/', [StorefrontController::class, 'index'])->name('store.home');
 Route::get('/products', [StorefrontController::class, 'products'])->name('store.products.index');
@@ -26,6 +28,10 @@ Route::get('/gioi-thieu', function () {
     }
     return view('store.about', compact('aboutProducts'));
 })->name('store.about');
+
+Route::post('/contact', [ContactController::class, 'store'])
+    ->name('contact.store');
+
 Route::view('/lien-he', 'store.contact')->name('store.contact');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -87,6 +93,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}', [AdminOrderController::class, 'update'])->name('orders.update');
+    Route::get('/contact-messages', [ContactMessageController::class, 'index'])
+    ->name('contact-messages.index');
+
+    Route::get('/contact-messages/{contactMessage}', [ContactMessageController::class, 'show'])
+        ->name('contact-messages.show');
+
+    Route::delete('/contact-messages/{contactMessage}', [ContactMessageController::class, 'destroy'])
+        ->name('contact-messages.destroy');
+
 });
 
 require __DIR__.'/auth.php';
