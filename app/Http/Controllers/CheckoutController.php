@@ -16,11 +16,13 @@ class CheckoutController extends Controller
 {
     public function index()
     {
-        $cart = session('cart', []);
-if (empty($cart)) {
-    return redirect()->route('cart.index')
-        ->with('error', 'Giỏ hàng của bạn đang trống.');
-}
+        $cart = session('checkout_cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('cart.index')
+                ->with('error', 'Giỏ hàng của bạn đang trống.');
+        }
+                
 
         $items = collect($cart)->map(function ($quantity, $key) {
             [$type, $id, $size] = $this->decodeKey((string) $key);
@@ -42,7 +44,133 @@ if (empty($cart)) {
 
         if ($items->isEmpty()) return redirect()->route('cart.index')->with('error', 'Các sản phẩm trong giỏ không còn tồn tại.');
         $total = $items->sum('line_total');
-        return view('checkout.index', compact('items', 'total'));
+
+        $couponCode = session('checkout_coupon');
+        $shippingFee = (float) session('checkout_shipping.fee', 0);
+
+        $discountAmount = $couponCode
+            ? $this->calculateDiscount($couponCode, $total, $shippingFee)
+            : 0;
+
+        return view('checkout.index', compact(
+            'items',
+            'total',
+            'couponCode',
+            'shippingFee',
+            'discountAmount'
+        ));
+    }
+
+    public function applyCoupon(Request $request)
+    {
+        $data = $request->validate([
+            'discount_code' => ['required', 'string', 'max:50'],
+        ], [
+            'discount_code.required' => 'Vui lòng nhập mã giảm giá.',
+        ]);
+
+        $code = strtoupper(trim($data['discount_code']));
+
+        $coupons = [
+            'GIAM10' => [
+                'type' => 'percent',
+                'value' => 10,
+                'label' => 'Giảm 10% tiền hàng',
+            ],
+            'GIAM50K' => [
+                'type' => 'fixed',
+                'value' => 50000,
+                'label' => 'Giảm 50.000₫',
+            ],
+            'FREESHIP' => [
+                'type' => 'shipping',
+                'value' => 30000,
+                'label' => 'Giảm phí vận chuyển tối đa 30.000₫',
+            ],
+        ];
+
+        if (!isset($coupons[$code])) {
+            return response()->json([
+                'message' => 'Mã giảm giá không hợp lệ.',
+            ], 422);
+        }
+
+        $cart = session('checkout_cart', []);
+
+        if (empty($cart)) {
+            return response()->json([
+                'message' => 'Giỏ hàng đang trống.',
+            ], 422);
+        }
+
+        $subtotal = 0;
+
+        foreach ($cart as $key => $quantity) {
+            [$type, $id, $size] = $this->decodeKey((string) $key);
+
+            if ($type === 'variant') {
+                $variant = ProductVariant::with('product')->find($id);
+                $product = $variant?->product;
+            } elseif ($type === 'product') {
+                $product = Product::find($id);
+            } else {
+                $product = null;
+            }
+
+            if (!$product || (int) $quantity < 1) {
+                return response()->json([
+                    'message' => 'Sản phẩm trong giỏ không hợp lệ.',
+                ], 422);
+            }
+
+            $subtotal += (float) $product->price * (int) $quantity;
+        }
+
+        if ($subtotal <= 0) {
+            return response()->json([
+                'message' => 'Đơn hàng không có giá trị hợp lệ.',
+            ], 422);
+        }
+
+        if ($code === 'FREESHIP' && !session()->has('checkout_shipping')) {
+            return response()->json([
+                'message' => 'Vui lòng tính phí vận chuyển trước khi áp dụng mã FREESHIP.',
+            ], 422);
+        }
+
+        session([
+            'checkout_coupon' => $code,
+        ]);
+
+        $shippingFee = (float) session('checkout_shipping.fee', 0);
+
+        $discount = $this->calculateDiscount(
+            $code,
+            $subtotal,
+            $shippingFee
+        );
+
+        return response()->json([
+            'message' => 'Áp dụng mã giảm giá thành công!',
+            'code' => $code,
+            'label' => $coupons[$code]['label'],
+            'discount' => $discount,
+            'formatted_discount' => number_format($discount, 0, ',', '.') . '₫',
+        ]);
+    }
+
+    private function calculateDiscount(
+        string $code,
+        float $subtotal,
+        float $shippingFee
+    ): float {
+        return match ($code) {
+            'GIAM10' => round($subtotal * 0.10),
+            'GIAM50K' => min(50000, $subtotal),
+            'FREESHIP' => min(30000, $shippingFee),
+            default => 0,
+        };
+
     }
 
     public function store(Request $request)
@@ -61,13 +189,25 @@ if (empty($cart)) {
             'payment_method.required' => 'Vui lòng chọn phương thức thanh toán.',
         ]);
 
-        if ($data['payment_method'] === 'bank_transfer' &&
-            (!config('services.vietqr.bank_bin') || !config('services.vietqr.account') || !config('services.vietqr.account_name'))) {
-            return back()->withInput()->withErrors(['payment_method' => 'Cửa hàng chưa cấu hình tài khoản nhận chuyển khoản QR. Vui lòng chọn COD hoặc liên hệ cửa hàng.']);
+        if (
+            $data['payment_method'] === 'bank_transfer' &&
+            (
+                !config('services.vietqr.bank_bin') ||
+                !config('services.vietqr.account') ||
+                !config('services.vietqr.account_name')
+            )
+        ) {
+            return back()->withInput()->withErrors([
+                'payment_method' => 'Cửa hàng chưa cấu hình tài khoản nhận chuyển khoản QR. Vui lòng chọn COD hoặc liên hệ cửa hàng.'
+            ]);
         }
 
-        $cart = session('cart', []);
-        if (empty($cart)) return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống.');
+        $cart = session('checkout_cart', []);
+
+        if (empty($cart)) {
+            return redirect()->route('cart.index')
+                ->with('error', 'Giỏ hàng của bạn đang trống.');
+        }
 
         try {
             $shipping = session('checkout_shipping');
@@ -81,8 +221,9 @@ if (empty($cart)) {
             }
 
             $shippingFee = (float) $shipping['fee'];
+            $couponCode = session('checkout_coupon');
 
-            $order = DB::transaction(function () use ($cart, $data, $request) {
+            $order = DB::transaction(function () use ($cart, $data, $request, $shippingFee, $couponCode) {
                 $orderLines = [];
                 $subtotal = 0;
 
@@ -112,21 +253,47 @@ if (empty($cart)) {
                     $orderLines[] = ['product' => $product, 'variant' => $variant, 'size' => $size, 'quantity' => $quantity, 'line_total' => $lineTotal];
                 }
 
-                // Tồn kho dùng chung: cộng số lượng mọi màu/size trước khi trừ.
-                foreach (collect($orderLines)->groupBy(fn($line) => $line['product']->id) as $lines) {
+                foreach (
+                    collect($orderLines)->groupBy(
+                        fn($line) => $line['product']->id
+                    ) as $lines
+                ) {
                     $product = $lines->first()['product'];
-                    if ($lines->sum('quantity') > $product->stock) throw new RuntimeException('Sản phẩm '.$product->name.' không đủ tồn kho chung.');
+
+                    if ($lines->sum('quantity') > $product->stock) {
+                        throw new RuntimeException(
+                            'Sản phẩm '.$product->name.' không đủ tồn kho chung.'
+                        );
+                    }
                 }
+
+                $orderNumber = 'FS'.now()->format('ymd').Str::upper(Str::random(6));
+
+                $discountAmount = $couponCode
+                    ? $this->calculateDiscount(
+                        $couponCode,
+                        $subtotal,
+                        $shippingFee
+                    )
+                    : 0;
+
+                $grandTotal = max(
+                    0,
+                    $subtotal + $shippingFee - $discountAmount
+                );
+
                 $order = Order::create([
-                    'order_number' => 'FS'.now()->format('ymd').Str::upper(Str::random(6)),
+                    'order_number' => $orderNumber,
                     'user_id' => $request->user()->id,
                     'customer_name' => $data['customer_name'],
                     'customer_phone' => $data['customer_phone'],
                     'shipping_address' => $data['shipping_address'],
                     'note' => $data['note'] ?? null,
                     'subtotal' => $subtotal,
-                    'total' => $subtotal,
+                    'discount_code' => $couponCode,
+                    'discount_amount' => $discountAmount,
                     'shipping_fee' => $shippingFee,
+                    'total' => $grandTotal,
                     'payment_method' => $data['payment_method'],
                     'payment_status' => 'unpaid',
                     'status' => 'pending',
@@ -154,7 +321,18 @@ if (empty($cart)) {
             return redirect()->route('cart.index')->with('error', $exception->getMessage());
         }
 
-        session()->forget(['cart', 'checkout_shipping']);
+        $remainingCart = session('cart', []);
+        $purchasedCart = session('checkout_cart', []);
+
+        foreach ($purchasedCart as $productId => $quantity) {
+            unset($remainingCart[$productId]);
+        }
+
+        session([
+            'cart' => $remainingCart,
+        ]);
+
+        session()->forget(['checkout_cart', 'checkout_shipping','checkout_coupon']);
 
         return redirect()->route('orders.show', $order)
             ->with('success', 'Đặt hàng thành công. Mã đơn hàng: '.$order->order_number);
@@ -218,7 +396,7 @@ if (empty($cart)) {
         return response()->json($response->json());
     }
 
-    // Tính phí vận chuyển GHN.
+    
     public function shippingFee(Request $request)
     {
         $data = $request->validate([
@@ -226,7 +404,7 @@ if (empty($cart)) {
             'to_ward_code' => ['required', 'string', 'max:20'],
         ]);
 
-        $cart = session('cart', []);
+        $cart = session('checkout_cart', []);
 
         if (empty($cart)) {
             return response()->json([
@@ -234,79 +412,99 @@ if (empty($cart)) {
             ], 422);
         }
 
-        $products = Product::whereIn('id', array_keys($cart))->get();
-
         $weight = 0;
         $subtotal = 0;
 
-        foreach ($cart as $productId => $quantity) {
-            $product = $products->firstWhere('id', $productId);
+        foreach ($cart as $key => $quantity) {
+            [$type, $id, $size] = $this->decodeKey((string) $key);
 
-            if (!$product) {
+            if ($type === 'variant') {
+                $variant = ProductVariant::with('product')->find($id);
+                $product = $variant?->product;
+            } elseif ($type === 'product') {
+                $product = Product::find($id);
+            } else {
+                $product = null;
+            }
+
+            if (!$product || (int) $quantity < 1) {
                 return response()->json([
-                    'message' => 'Có sản phẩm không còn tồn tại trong giỏ hàng.',
+                    'message' => 'Sản phẩm trong giỏ không hợp lệ.',
                 ], 422);
             }
 
-            $quantity = (int) $quantity;
+            $weight += (int) $quantity *
+                (int) config('services.ghn.default_weight', 500);
 
-            if ($quantity < 1) {
-                return response()->json([
-                    'message' => 'Số lượng sản phẩm không hợp lệ.',
-                ], 422);
-            }
-
-            // Tạm tính mỗi sản phẩm nặng 500 gram.
-            $weight += $quantity * (int) config('services.ghn.default_weight', 500);
-            $subtotal += (float) $product->price * $quantity;
+            $subtotal += (float) $product->price * (int) $quantity;
         }
 
-        $payload = [
-            'to_district_id' => (int) $data['to_district_id'],
-            'to_ward_code' => $data['to_ward_code'],
-            'service_type_id' => (int) config('services.ghn.service_type_id', 2),
-            'weight' => max(1, $weight),
-            'insurance_value' => (int) round($subtotal),
-        ];
+        // Phí dự phòng khi GHN không hoạt động.
+        $fallbackFee = 30000;
 
-        try {
-            $response = Http::timeout(15)->withHeaders([
-                'Token' => config('services.ghn.token'),
-                'ShopId' => (string) config('services.ghn.shop_id'),
-            ])->post(
-                rtrim(config('services.ghn.api_url'), '/') .
-                    '/shiip/public-api/v2/shipping-order/fee',
-                $payload
-            );
-
-            if (!$response->successful() || $response->json('code') != 200) {
-                return response()->json([
-                    'message' => 'GHN không tính được phí cho địa chỉ này. Vui lòng kiểm tra địa chỉ hoặc cấu hình GHN.',
-                ], 502);
-            }
-
-            $fee = (int) $response->json('data.total');
-
+        // Hàm lưu phí vận chuyển vào session.
+        $saveShipping = function ($fee, $fallback) use ($data) {
             session([
                 'checkout_shipping' => [
                     'district_id' => (int) $data['to_district_id'],
                     'ward_code' => $data['to_ward_code'],
-                    'fee' => $fee,
+                    'fee' => (int) $fee,
+                    'fallback' => $fallback,
                 ],
             ]);
 
             return response()->json([
-                'shipping_fee' => $fee,
+                'shipping_fee' => (int) $fee,
                 'formatted_fee' => number_format($fee, 0, ',', '.') . '₫',
+                'fallback' => $fallback,
+                'message' => $fallback
+                    ? 'GHN hiện không tính được phí. Shop áp dụng phí dự phòng 30.000₫.'
+                    : 'Đã tính phí vận chuyển theo GHN.',
             ]);
+        };
+
+        try {
+            $payload = [
+                'to_district_id' => (int) $data['to_district_id'],
+                'to_ward_code' => $data['to_ward_code'],
+                'service_type_id' => (int) config('services.ghn.service_type_id', 2),
+                'weight' => max(1, $weight),
+                'insurance_value' => (int) round($subtotal),
+            ];
+
+            $response = Http::timeout(15)
+                ->withHeaders([
+                    'Token' => config('services.ghn.token'),
+                    'ShopId' => (string) config('services.ghn.shop_id'),
+                ])
+                ->post(
+                    rtrim(config('services.ghn.api_url'), '/') .
+                        '/shiip/public-api/v2/shipping-order/fee',
+                    $payload
+                );
+
+            if (
+                $response->successful() &&
+                $response->json('code') == 200 &&
+                is_numeric($response->json('data.total'))
+            ) {
+                return $saveShipping(
+                    (int) $response->json('data.total'),
+                    false
+                );
+            }
+
+            // GHN trả lỗi: sử dụng phí dự phòng.
+            return $saveShipping($fallbackFee, true);
+
         } catch (\Throwable $exception) {
             report($exception);
 
-            return response()->json([
-                'message' => 'Không kết nối được GHN. Vui lòng thử lại.',
-            ], 502);
+            // GHN mất kết nối hoặc hết thời gian chờ.
+            return $saveShipping($fallbackFee, true);
         }
     }
+
 
     public function saveShippingInfo(Request $request)
     {

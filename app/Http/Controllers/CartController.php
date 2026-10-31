@@ -126,4 +126,33 @@ class CartController extends Controller
         if (ctype_digit($key)) return ['product', (int) $key, null];
         return ['invalid', 0, null];
     }
+    public function checkoutSelected(Request $request){
+    $data = $request->validate([
+        'selected' => ['required', 'array', 'min:1'],
+        'selected.*' => ['required', 'integer', 'distinct'],
+    ], [
+        'selected.required' => 'Vui lòng chọn ít nhất một sản phẩm.',
+        'selected.min' => 'Vui lòng chọn ít nhất một sản phẩm.',
+    ]);
+
+    $cart = session('cart', []);
+    $selectedCart = [];
+
+    foreach ($data['selected'] as $productId) {
+        if (!array_key_exists($productId, $cart)) {
+            continue;
+        }
+
+        $selectedCart[$productId] = (int) $cart[$productId];
+    }
+
+    if (empty($selectedCart)) {
+        return redirect()->route('cart.index')
+            ->with('error', 'Không tìm thấy sản phẩm được chọn trong giỏ hàng.');
+    }
+
+    session(['checkout_cart' => $selectedCart]);
+
+    return redirect()->route('checkout.index');
+    }
 }
