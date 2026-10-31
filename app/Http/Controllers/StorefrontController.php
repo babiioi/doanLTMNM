@@ -117,7 +117,7 @@ class StorefrontController extends Controller
 
     public function show(Product $product)
     {
-        $product->load('category');
+        $product->load(['category', 'variants']);
         return view('store.show', compact('product'));
     }
 }

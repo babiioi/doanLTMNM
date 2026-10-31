@@ -53,21 +53,36 @@
         <div class="form-text">Giá sale phải thấp hơn giá gốc.</div>
     </div>
 
-    <div class="col-md-4 mb-3">
-        <label class="form-label">Số lượng tồn kho *</label>
-        <input
-            type="number"
-            min="0"
-            name="stock"
-            class="form-control @error('stock') is-invalid @enderror"
-            value="{{ old('stock', $product->stock ?? 0) }}"
-            required
-        >
-        @error('stock')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
+    <div class="col-md-4 mb-3"><label class="form-label">Tồn kho chung của sản phẩm *</label><input type="number" min="0" max="100000" name="stock" class="form-control" value="{{ old('stock', $product->stock ?? 0) }}" required><div class="form-text">Không chia theo màu hoặc size.</div></div>
 </div>
+<div class="card border mb-3"><div class="card-header bg-light fw-semibold">Màu sắc và 2 ảnh theo màu</div><div class="card-body">
+<p class="text-secondary small">Size S, M, L được tạo tự động cho mọi màu. Không cần nhập size hoặc tồn kho riêng cho màu. Thêm từng màu và tải lên hai ảnh của màu đó.</p>
+@php
+$colorRows = old('colors');
+if ($colorRows === null) {
+    $colorRows = isset($product) && $product->exists ? $product->variants->groupBy('color')->map(fn($items) => ['name' => $items->first()->color, 'image' => $items->first()->image, 'image_2' => $items->first()->image_2])->values()->all() : [];
+}
+@endphp
+<div id="color-rows">
+@foreach($colorRows as $i => $row)
+<div class="row g-2 align-items-end border rounded-3 p-2 mb-2 color-row">
+<div class="col-md-3"><label class="form-label">Tên màu</label><input name="colors[{{ $i }}][name]" class="form-control" value="{{ $row['name'] ?? '' }}" maxlength="80" required></div>
+<div class="col-md-4"><label class="form-label">Ảnh 1</label><input type="file" name="colors[{{ $i }}][image]" accept=".jpg,.jpeg,.png,.webp" class="form-control">@if(!empty($row['image']))<small>Đã có: {{ basename($row['image']) }}</small>@endif</div>
+<div class="col-md-4"><label class="form-label">Ảnh 2</label><input type="file" name="colors[{{ $i }}][image_2]" accept=".jpg,.jpeg,.png,.webp" class="form-control">@if(!empty($row['image_2']))<small>Đã có: {{ basename($row['image_2']) }}</small>@endif</div>
+<div class="col-md-1"><button type="button" class="btn btn-outline-danger remove-color">×</button></div>
+</div>
+@endforeach
+</div>
+<button type="button" class="btn btn-outline-dark btn-sm" id="add-color">+ Thêm màu</button>
+@foreach($errors->getMessages() as $field => $messages)
+@if(str_starts_with($field, 'colors.'))<div class="text-danger small">{{ implode(' ', $messages) }}</div>@endif
+@endforeach
+</div></div>
+<script>
+(()=>{const wrap=document.getElementById('color-rows');let next={{ count($colorRows) }};
+document.getElementById('add-color').addEventListener('click',()=>{const i=next++;const row=document.createElement('div');row.className='row g-2 align-items-end border rounded-3 p-2 mb-2 color-row';row.innerHTML=`<div class="col-md-3"><label class="form-label">Tên màu</label><input name="colors[${i}][name]" class="form-control" maxlength="80" required></div><div class="col-md-4"><label class="form-label">Ảnh 1</label><input type="file" name="colors[${i}][image]" accept=".jpg,.jpeg,.png,.webp" class="form-control"></div><div class="col-md-4"><label class="form-label">Ảnh 2</label><input type="file" name="colors[${i}][image_2]" accept=".jpg,.jpeg,.png,.webp" class="form-control"></div><div class="col-md-1"><button type="button" class="btn btn-outline-danger remove-color">×</button></div>`;wrap.appendChild(row)});
+wrap.addEventListener('click',e=>{if(e.target.classList.contains('remove-color'))e.target.closest('.color-row').remove()});})();
+</script>
 <div class="mb-3"><label class="form-label">Mô tả</label><textarea name="description" rows="4" class="form-control @error('description') is-invalid @enderror">{{ old('description', $product->description) }}</textarea>@error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror</div>
 <div class="mb-3"><label class="form-label">Ảnh sản phẩm (JPG, PNG, WEBP; tối đa 2MB)</label><input type="file" name="image" accept=".jpg,.jpeg,.png,.webp" class="form-control @error('image') is-invalid @enderror">@error('image')<div class="invalid-feedback">{{ $message }}</div>@enderror
 @if($product->image)<img src="{{ asset('storage/'.$product->image) }}" class="mt-2 rounded" width="120" alt="Ảnh hiện tại">@endif</div>

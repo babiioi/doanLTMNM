@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductVariant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -61,11 +62,13 @@ class OrderController extends Controller
                     $items = $lockedOrder->items()->get();
 
                     foreach ($items as $item) {
+                        if ($item->product_variant_id) {
+                            $variant = ProductVariant::whereKey($item->product_variant_id)->lockForUpdate()->first();
+                            if ($variant) $variant->increment('stock', $item->quantity);
+                        }
                         if ($item->product_id) {
                             $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
-                            if ($product) {
-                                $product->increment('stock', $item->quantity);
-                            }
+                            if ($product) $product->increment('stock', $item->quantity);
                         }
                     }
                 }

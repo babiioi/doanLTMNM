@@ -1,7 +1,12 @@
 <div class="row g-4">
 @forelse($products as $product)
     <div class="col-6 col-lg-3">
-        <div class="card product-card h-100 shadow-sm">
+        <div class="card product-card h-100 shadow-sm position-relative">
+            <form method="POST" action="{{ auth()->check() ? route('wishlist.toggle', $product) : route('login') }}" class="position-absolute mm-wishlist-form" data-login-url="{{ route('login') }}" style="top:10px;right:10px;z-index:2">
+                @csrf
+                @php $isFavorite = auth()->check() && \Illuminate\Support\Facades\DB::table('wishlists')->where('user_id', auth()->id())->where('product_id', $product->id)->exists(); @endphp
+                <button type="submit" class="btn btn-light rounded-circle shadow-sm" aria-label="{{ $isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích' }}" title="{{ $isFavorite ? 'Bỏ yêu thích' : 'Thêm yêu thích' }}" data-wishlist-button data-active="{{ $isFavorite ? 1 : 0 }}" style="font-size:23px;color:{{ $isFavorite ? '#d43d60' : '#555' }}">{{ $isFavorite ? '♥' : '♡' }}</button>
+            </form>
             <a class="text-decoration-none text-dark" href="{{ route('store.products.show', $product) }}">
                 @if($product->image)
                     <img
@@ -38,7 +43,7 @@
                 @endif
 
                 @if($product->stock > 0)
-                    <form method="POST" action="{{ route('cart.store', $product) }}" class="mt-auto">@csrf<input type="hidden" name="quantity" value="1"><button class="btn btn-outline-dark btn-sm w-100">Thêm vào giỏ</button></form>
+                    <a href="{{ route('store.products.show', $product) }}" class="btn btn-outline-dark btn-sm w-100 mt-auto">Thêm vào giỏ</a>
                 @else
                     <button class="btn btn-secondary btn-sm w-100 mt-auto" disabled>Hết hàng</button>
                 @endif

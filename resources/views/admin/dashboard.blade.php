@@ -8,7 +8,7 @@
 <div class="mb-4">
     <h2 class="page-heading">Tổng quan</h2>
     <p class="page-subtitle mb-0">
-        Theo dõi tình hình hoạt động của Fashion Store.
+        Theo dõi tình hình hoạt động của Mơ Màng.
     </p>
 </div>
 

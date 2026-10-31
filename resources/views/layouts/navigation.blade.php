@@ -1,8 +1,8 @@
 
 <nav class="admin-sidebar">
     <a href="{{ route('admin.dashboard') }}" class="admin-brand">
-        <span class="brand-icon">F</span>
-        <span>FASHION STORE</span>
+        <img src="{{ asset('images/mo-mang-logo.png') }}" alt="Logo Mơ Màng" style="height:70px;width:75px;object-fit:contain;background:#fff;border-radius:10px;padding:3px;flex-shrink:0">
+        <span>MƠ MÀNG</span>
     </a>
 
     <div class="admin-user">
