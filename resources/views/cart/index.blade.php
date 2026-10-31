@@ -1,5 +1,5 @@
 @extends('layouts.store')
-@section('title', 'Giỏ hàng | Fashion Store')
+@section('title', 'Giỏ hàng | Mơ Màng')
 
 @section('content')
 <div class="mb-4">
@@ -20,12 +20,12 @@
             <div class="bg-white border rounded-4 p-3 p-md-4">
                 @foreach($items as $item)
                     <div class="d-flex gap-3 py-3 {{ !$loop->last ? 'border-bottom' : '' }}">
-                        @if($item['product']->image)
-                            <img src="{{ asset('storage/'.$item['product']->image) }}" alt="{{ $item['product']->name }}"
+                        @if($item['image'])
+                            <img src="{{ asset('storage/'.$item['image']) }}" alt="{{ $item['product']->name }}"
                                  style="width:100px;height:120px;object-fit:cover" class="rounded-3">
                         @else
                             <div class="bg-light rounded-3 d-flex align-items-center justify-content-center"
-                                 style="width:100px;height:120px">FASHION</div>
+                                 style="width:100px;height:120px">MƠ MÀNG</div>
                         @endif
 
                         <div class="flex-grow-1">
@@ -33,16 +33,16 @@
                                href="{{ route('store.products.show', $item['product']) }}">
                                 {{ $item['product']->name }}
                             </a>
-                            <div class="text-secondary small mt-1">Còn {{ $item['product']->stock }} sản phẩm</div>
+                            <div class="text-secondary small mt-1">@if($item['variant']) Màu: {{ $item['variant']->color }} · Size: {{ $item['size'] }} · Còn {{ $item['stock'] }} sản phẩm @else Size: {{ $item['size'] ?: "—" }} · Còn {{ $item['stock'] }} sản phẩm @endif</div>
                             <div class="fw-bold mt-2">{{ number_format($item['product']->price, 0, ',', '.') }}₫</div>
                             <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
-                                <form method="POST" action="{{ route('cart.update', $item['product']) }}" class="d-flex gap-2">
+                                <form method="POST" action="{{ route('cart.items.update', $item['key']) }}" class="d-flex gap-2">
                                     @csrf @method('PATCH')
-                                    <input type="number" name="quantity" min="1" max="{{ max(1, $item['product']->stock) }}"
+                                    <input type="number" name="quantity" min="1" max="{{ max(1, $item['stock']) }}"
                                            value="{{ $item['quantity'] }}" class="form-control form-control-sm" style="width:80px">
                                     <button class="btn btn-outline-dark btn-sm">Cập nhật</button>
                                 </form>
-                                <form method="POST" action="{{ route('cart.destroy', $item['product']) }}">
+                                <form method="POST" action="{{ route('cart.items.destroy', $item['key']) }}">
                                     @csrf @method('DELETE')
                                     <button class="btn btn-link btn-sm text-danger text-decoration-none">Xóa</button>
                                 </form>

@@ -21,7 +21,7 @@
                     <tbody>
                     @foreach($order->items as $item)
                         <tr>
-                            <td>{{ $item->product_name }}</td>
+                            <td>{{ $item->product_name }}@if($item->product_color || $item->product_size)<div class="small text-secondary">Màu: {{ $item->product_color ?: '—' }} · Size: {{ $item->product_size ?: '—' }}</div>@endif</td>
                             <td>{{ number_format($item->product_price, 0, ',', '.') }}₫</td>
                             <td>{{ $item->quantity }}</td>
                             <td class="text-nowrap">{{ number_format($item->line_total, 0, ',', '.') }}₫</td>

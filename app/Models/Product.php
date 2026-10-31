@@ -18,6 +18,11 @@ class Product extends Model
         'stock' => 'integer',
     ];
 
+    public function variants()
+    {
+        return $this->hasMany(ProductVariant::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);

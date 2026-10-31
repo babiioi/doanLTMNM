@@ -1,5 +1,5 @@
 @extends('layouts.store')
-@section('title', 'Đặt hàng | Fashion Store')
+@section('title', 'Đặt hàng | Mơ Màng')
 
 @section('content')
 <div class="mb-4">
@@ -55,7 +55,7 @@
                     <input type="radio" name="payment_method" value="bank_transfer"
                            @checked(old('payment_method') === 'bank_transfer') required>
                     <span><strong>Chuyển khoản ngân hàng bằng QR</strong><br>
-                        <small class="text-secondary">Quét mã QR sau khi đặt hàng. Đơn sẽ được xác nhận thanh toán thủ công.</small></span>
+                        <small class="text-secondary">Sau khi đặt hàng, quét QR bằng ứng dụng ngân hàng để chuyển khoản. Cửa hàng sẽ đối soát và xác nhận thủ công.</small></span>
                 </label>
                 @error('payment_method')<div class="text-danger small mt-2">{{ $message }}</div>@enderror
             </div>
@@ -68,6 +68,7 @@
                     <div class="d-flex justify-content-between gap-3 mb-3">
                         <div>
                             <div class="fw-semibold">{{ $item['product']->name }}</div>
+                            @if($item['variant'])<small class="text-secondary">Màu: {{ $item['variant']->color }} · Size: {{ $item['size'] }}<br></small>@else<small class="text-secondary">Size: {{ $item['size'] ?: '—' }}<br></small>@endif
                             <small class="text-secondary">Số lượng: {{ $item['quantity'] }}</small>
                         </div>
                         <div class="text-nowrap">{{ number_format($item['line_total'], 0, ',', '.') }}₫</div>

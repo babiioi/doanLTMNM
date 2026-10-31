@@ -1,5 +1,5 @@
 @extends('layouts.store')
-@section('title', 'Fashion Store - Trang chủ')
+@section('title', 'Mơ Màng - Trang chủ')
 
 @section('content')
 {{-- 1. Banner bộ sưu tập mới --}}
@@ -11,13 +11,13 @@
             <img src="{{ asset('storage/banners/banner1.webp') }}"
                  alt="Banner 1" class="banner-slide active">
 
-            <img src="{{ asset('storage/banners/banner2.webp') }}"
+            <img src="{{ asset('storage/banners/banner2.png') }}"
                  alt="Banner 2" class="banner-slide">
 
-            <img src="{{ asset('storage/banners/banner3.webp') }}"
+            <img src="{{ asset('storage/banners/banner3.png') }}"
                  alt="Banner 3" class="banner-slide">
 
-            <img src="{{ asset('storage/banners/banner4.jpg') }}"
+            <img src="{{ asset('storage/banners/banner4.png') }}"
                  alt="Banner 4" class="banner-slide">
         </div>
 
@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 {{-- 7. Tìm hiểu về chúng tôi --}}
 <section class="rounded-4 p-4 p-md-5 mb-2" style="background:#eee7e1"><div class="row align-items-center g-3">
-    <div class="col-lg-8"><p class="small text-uppercase mb-2">Our story</p><h2 class="h2 fw-bold">Tìm hiểu về chúng tôi</h2><p class="mb-0 text-secondary">Fashion Store mong muốn giúp bạn tìm thấy những thiết kế phù hợp với phong cách riêng và dễ dàng mua sắm mỗi ngày.</p></div>
-    <div class="col-lg-4 text-lg-end"><a href="{{ route('store.about') }}" class="btn btn-dark rounded-pill px-4">Về Fashion Store</a></div>
+    <div class="col-lg-8"><p class="small text-uppercase mb-2">Our story</p><h2 class="h2 fw-bold">Tìm hiểu về chúng tôi</h2><p class="mb-0 text-secondary">Mơ Màng mong muốn giúp bạn tìm thấy những thiết kế phù hợp với phong cách riêng và dễ dàng mua sắm mỗi ngày.</p></div>
+    <div class="col-lg-4 text-lg-end"><a href="{{ route('store.about') }}" class="btn btn-dark rounded-pill px-4">Về Mơ Màng</a></div>
 </div></section>
 @endsection

@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\StorefrontController;
@@ -15,15 +16,28 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [StorefrontController::class, 'index'])->name('store.home');
 Route::get('/products', [StorefrontController::class, 'products'])->name('store.products.index');
 Route::get('/products/{product}', [StorefrontController::class, 'show'])->name('store.products.show');
-Route::view('/gioi-thieu', 'store.about')->name('store.about');
+Route::get('/gioi-thieu', function () {
+    $categories = ['nang' => 'Đồ ngủ nữ', 'chang' => 'Đồ ngủ nam', 'be' => 'Đồ ngủ trẻ em'];
+    $aboutProducts = [];
+    foreach ($categories as $key => $category) {
+        $aboutProducts[$key] = \App\Models\Product::whereNotNull('image')
+            ->whereHas('category', fn ($query) => $query->where('name', $category))
+            ->latest()->first();
+    }
+    return view('store.about', compact('aboutProducts'));
+})->name('store.about');
 Route::view('/lien-he', 'store.contact')->name('store.contact');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
+Route::patch('/cart/items/{key}', [CartController::class, 'updateItem'])->name('cart.items.update');
+Route::delete('/cart/items/{key}', [CartController::class, 'destroyItem'])->name('cart.items.destroy');
 Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/yeu-thich', [WishlistController::class, 'index'])->name('wishlist.index');
+    Route::post('/yeu-thich/{product}', [WishlistController::class, 'toggle'])->name('wishlist.toggle');
     Route::get('/profile', [ProfileController::class, 'edit'])
         ->name('profile.edit');
 

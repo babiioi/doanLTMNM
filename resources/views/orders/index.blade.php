@@ -1,5 +1,5 @@
 @extends('layouts.store')
-@section('title', 'Đơn hàng của tôi | Fashion Store')
+@section('title', 'Đơn hàng của tôi | Mơ Màng')
 
 @section('content')
 <h1 class="h2 fw-bold mb-4">Đơn hàng của tôi</h1>

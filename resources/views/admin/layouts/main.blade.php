@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="vi">
 <head>
+<link rel="icon" type="image/png" href="{{ asset('images/mo-mang-favicon.png') }}">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'Quản trị - Fashion Store')</title>
+    <title>@yield('title', 'Quản trị - Mơ Màng')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -417,8 +418,8 @@
 <body>
     <aside class="admin-sidebar">
         <a class="brand" href="{{ route('admin.dashboard') }}">
-            <span class="brand-icon">F</span>
-            <span>FASHION STORE</span>
+            <img src="{{ asset('images/mo-mang-logo.png') }}" alt="Logo Mơ Màng" style="height:70px;width:75px;object-fit:contain;background:#fff;border-radius:10px;padding:3px;flex-shrink:0">
+            <span>MƠ MÀNG</span>
         </a>
 
         <div class="admin-profile">
@@ -502,7 +503,7 @@
         </main>
 
         <footer class="admin-footer">
-            © {{ date('Y') }} Fashion Store · Hệ thống quản trị
+            © {{ date('Y') }} Mơ Màng · Hệ thống quản trị
         </footer>
     </div>
 

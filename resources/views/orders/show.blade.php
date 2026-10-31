@@ -1,5 +1,5 @@
 @extends('layouts.store')
-@section('title', 'Đơn '.$order->order_number.' | Fashion Store')
+@section('title', 'Đơn '.$order->order_number.' | Mơ Màng')
 
 @section('content')
 <div class="mb-4">
@@ -19,7 +19,7 @@
     @endphp
     <div class="alert alert-info">
         <strong>Hướng dẫn chuyển khoản</strong><br>
-        Đơn hàng đang chờ xác nhận thanh toán. Sau khi chuyển khoản, cửa hàng sẽ kiểm tra giao dịch và cập nhật trạng thái.
+        Vui lòng quét mã bằng ứng dụng ngân hàng và kiểm tra đúng số tiền, số tài khoản, nội dung chuyển khoản trước khi xác nhận. Sau khi ngân hàng báo chuyển thành công, cửa hàng sẽ kiểm tra và cập nhật trạng thái thủ công.
         <br><small>Không đóng trang trước khi lưu lại mã đơn: {{ $order->order_number }}</small>
     </div>
     <div class="bg-white border rounded-4 p-4 mb-4">
@@ -31,9 +31,15 @@
                 <div class="col-md-8">
                     <h2 class="h5 fw-bold">Quét mã QR để thanh toán</h2>
                     <p class="mb-1">Số tiền: <strong class="text-danger">{{ number_format($order->total, 0, ',', '.') }}₫</strong></p>
-                    <p class="mb-1">Ngân hàng: {{ $bankBin }}</p>
-                    <p class="mb-1">Số tài khoản: {{ $bankAccount }}</p>
-                    <p class="mb-0">Nội dung chuyển khoản: <strong>Thanh toan {{ $order->order_number }}</strong></p>
+                    <p class="mb-1">Mã ngân hàng (BIN): {{ $bankBin }}</p>
+                    <p class="mb-1">Chủ tài khoản: {{ $bankName }}</p><p class="mb-1">Số tài khoản: <strong id="bank-account">{{ $bankAccount }}</strong> <button type="button" class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('bank-account').textContent)">Sao chép</button></p>
+                    <p class="mb-0">Nội dung chuyển khoản: <strong id="transfer-note">Thanh toan {{ $order->order_number }}</strong> <button type="button" class="btn btn-outline-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('transfer-note').textContent)">Sao chép</button></p>
+                </div>
+                <div class="mt-3 p-3 rounded-3" style="background:#fff9f5; border:1px solid #f0e5dc;">
+                    <h3 class="h6 fw-bold mb-2">Thanh toán qua VietQR</h3>
+                    <p class="mb-2">Quét mã QR bằng ứng dụng ngân hàng để thanh toán đơn hàng. Số tiền và nội dung chuyển khoản đã được điền sẵn.</p>
+                    <p class="mb-2">Sau khi chuyển khoản thành công, Mơ Màng sẽ kiểm tra và xác nhận đơn hàng trong thời gian sớm nhất.</p>
+                    <p class="mb-0 fw-semibold">Mơ Màng cảm ơn bạn đã tin tưởng và mua sắm tại cửa hàng. Chúc bạn một ngày thật vui vẻ!</p>
                 </div>
             </div>
         @else
@@ -52,6 +58,7 @@
                 <div class="d-flex justify-content-between gap-3 py-3 {{ !$loop->last ? 'border-bottom' : '' }}">
                     <div>
                         <div class="fw-semibold">{{ $item->product_name }}</div>
+                        @if($item->product_color || $item->product_size)<small class="text-secondary">Màu: {{ $item->product_color ?: '—' }} · Size: {{ $item->product_size ?: '—' }}</small><br>@endif
                         <small class="text-secondary">{{ number_format($item->product_price, 0, ',', '.') }}₫ × {{ $item->quantity }}</small>
                     </div>
                     <div class="fw-semibold text-nowrap">{{ number_format($item->line_total, 0, ',', '.') }}₫</div>

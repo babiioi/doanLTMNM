@@ -1,0 +1,22 @@
+MƠ MÀNG – HƯỚNG DẪN KÍCH HOẠT THANH TOÁN QR
+
+1. Mở file .env trong thư mục Laravel (KHÔNG gửi file này lên GitHub).
+2. Điền thông tin tài khoản NHẬN TIỀN THẬT của cửa hàng:
+
+VIETQR_BANK_BIN=
+VIETQR_ACCOUNT=
+VIETQR_ACCOUNT_NAME=
+
+- BIN: mã BIN ngân hàng được VietQR hỗ trợ, không phải tên ngân hàng viết tùy ý.
+- ACCOUNT: số tài khoản ngân hàng của cửa hàng.
+- ACCOUNT_NAME: tên chủ tài khoản, viết không dấu để tương thích tốt.
+
+3. Chạy: php artisan optimize:clear
+4. Đăng nhập, thêm sản phẩm vào giỏ, chọn chuyển khoản QR, xác nhận đặt hàng.
+5. Trang chi tiết đơn sẽ hiển thị QR kèm số tiền và nội dung chuyển khoản theo mã đơn.
+6. Dùng ứng dụng ngân hàng kiểm tra mã QR trước khi chuyển tiền thật.
+7. Sau khi xác minh đã nhận tiền, quản trị viên cập nhật trạng thái thanh toán thành Đã thanh toán.
+
+QUAN TRỌNG: Đây là VietQR chuyển khoản ngân hàng, không phải cổng thanh toán có webhook. Website không thể tự xác nhận đã nhận tiền chỉ nhờ hiển thị QR. Muốn tự động cần tích hợp dịch vụ đối soát có xác thực.
+
+ĐÃ SỬA: Trang Giới thiệu giữ nguyên văn bản, biểu tượng và hiển thị ảnh sản phẩm có thật theo danh mục khi cơ sở dữ liệu có ảnh; thanh toán QR chặn đặt hàng nếu chưa cấu hình ngân hàng, hướng dẫn chuyển khoản rõ hơn.

@@ -1,5 +1,5 @@
 @extends('layouts.store')
-@section('title', ($pageTitle ?? 'Sản phẩm') . ' - Fashion Store')
+@section('title', ($pageTitle ?? 'Sản phẩm') . ' - Mơ Màng')
 @section('content')
 <div class="mb-4"><h1 class="h2 fw-bold">{{ $pageTitle ?? 'Tất cả sản phẩm' }}</h1><p class="text-secondary">Tìm thiết kế phù hợp với phong cách của bạn.</p></div>
 <form method="GET" action="{{ route('store.products.index') }}" class="row g-2 mb-4">

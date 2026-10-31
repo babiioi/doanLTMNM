@@ -66,3 +66,13 @@ Thanh điều hướng đã liên kết với bộ lọc sản phẩm:
 - Bộ sưu tập: BST Tí ta tí tởn, BST Nhí nha nhí nhảnh, BST Tếu ta tếu táo.
 
 Sau khi cập nhật mã nguồn, chạy `php artisan migrate --seed` để thêm cột bộ sưu tập và các danh mục mới. Khi thêm/sửa sản phẩm trong trang Quản trị, chọn đúng danh mục và bộ sưu tập để sản phẩm xuất hiện trong mục tương ứng.
+
+## Biến thể màu sắc và kích thước sản phẩm (Mơ Màng)
+
+- Trong trang Quản trị → Sản phẩm → Thêm/Sửa, thêm từng tổ hợp màu + size, nhập tồn kho và tải ảnh cho màu đó (có thể tải cùng một ảnh cho các size cùng màu).
+- Trang chi tiết sản phẩm cho phép khách chọn màu, size; ảnh và tồn kho thay đổi theo biến thể đã chọn.
+- Giỏ hàng, checkout và chi tiết đơn hàng lưu đúng màu/size; khi đặt hàng, hệ thống trừ tồn kho của biến thể và cập nhật tồn kho tổng.
+- Khi đơn hàng bị hủy trong trang quản trị, hệ thống hoàn lại tồn kho của biến thể.
+- Sản phẩm chưa khai báo biến thể vẫn hoạt động theo cơ chế tồn kho chung cũ.
+
+Sau khi cập nhật source, chạy `php artisan migrate` để tạo bảng biến thể và bổ sung thông tin màu/size cho chi tiết đơn hàng. Không chạy `migrate:fresh` vì lệnh đó xóa dữ liệu hiện có. Nếu vừa tải ảnh lên mà ảnh chưa hiển thị, kiểm tra liên kết lưu trữ bằng `php artisan storage:link`.
