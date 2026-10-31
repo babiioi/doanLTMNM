@@ -34,7 +34,7 @@ if (empty($cart)) {
             }
             if (!$product) return null;
             return [
-                'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => $size ?: $variant?->size,
+                'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện') ? null : ($size ?: $variant?->size),
                 'quantity' => (int) $quantity,
                 'line_total' => (float) $product->price * (int) $quantity,
             ];
@@ -106,7 +106,7 @@ if (empty($cart)) {
                             throw new RuntimeException('Một sản phẩm trong giỏ không đủ tồn kho. Vui lòng kiểm tra lại.');
                         }
                     }
-                    $size = $size ?: $variant?->size;
+                    $size = str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện') ? null : ($size ?: $variant?->size);
                     $lineTotal = (float) $product->price * $quantity;
                     $subtotal += $lineTotal;
                     $orderLines[] = ['product' => $product, 'variant' => $variant, 'size' => $size, 'quantity' => $quantity, 'line_total' => $lineTotal];

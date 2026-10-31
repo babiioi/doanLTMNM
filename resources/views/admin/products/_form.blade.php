@@ -56,7 +56,7 @@
     <div class="col-md-4 mb-3"><label class="form-label">Tồn kho chung của sản phẩm *</label><input type="number" min="0" max="100000" name="stock" class="form-control" value="{{ old('stock', $product->stock ?? 0) }}" required><div class="form-text">Không chia theo màu hoặc size.</div></div>
 </div>
 <div class="card border mb-3"><div class="card-header bg-light fw-semibold">Màu sắc và 2 ảnh theo màu</div><div class="card-body">
-<p class="text-secondary small">Size S, M, L được tạo tự động cho mọi màu. Không cần nhập size hoặc tồn kho riêng cho màu. Thêm từng màu và tải lên hai ảnh của màu đó.</p>
+<p class="text-secondary small">Đồ ngủ tự tạo size S/M/L; Phụ kiện ngủ chỉ có màu, không có size. Không cần nhập size hoặc tồn kho riêng cho màu. Thêm từng màu và tải lên hai ảnh của màu đó.</p>
 @php
 $colorRows = old('colors');
 if ($colorRows === null) {

@@ -27,7 +27,7 @@ class CartController extends Controller
                 $image = $product->image;
             }
             return [
-                'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => $size ?: $variant?->size,
+                'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => ($variant && str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện')) ? null : ($size ?: $variant?->size),
                 'stock' => $stock, 'image' => $image, 'quantity' => (int) $quantity,
                 'line_total' => (float) $product->price * (int) $quantity,
             ];
@@ -41,19 +41,22 @@ class CartController extends Controller
         $data = $request->validate([
             'quantity' => ['required', 'integer', 'min:1', 'max:99'],
             'variant_id' => ['nullable', 'integer'],
-            'size' => ['required', 'in:S,M,L'],
+            'size' => ['nullable', 'in:S,M,L'],
         ]);
 
+        $product->load('category');
+        $isAccessory = str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện');
+        if (!$isAccessory && empty($data['size'])) return back()->withErrors(['size' => 'Vui lòng chọn size.']);
         $variantsExist = $product->variants()->exists();
         if ($variantsExist) {
             $variant = $product->variants()->whereKey($data['variant_id'] ?? 0)->first();
-            if (!$variant) return back()->with('error', 'Vui lòng chọn màu sắc và kích thước hợp lệ.');
+            if (!$variant || ($isAccessory && !in_array($variant->size, ['ONE','S','M','L'], true)) || (!$isAccessory && $variant->size !== $data['size'])) return back()->with('error', 'Vui lòng chọn màu sắc và kích thước hợp lệ.');
             $stock = $product->stock;
-            $key = 'v_'.$variant->id.'_s_'.$data['size'];
+            $key = $isAccessory ? 'v_'.$variant->id : 'v_'.$variant->id.'_s_'.$data['size'];
         } else {
             $variant = null;
             $stock = $product->stock;
-            $key = 'p_'.$product->id.'_s_'.$data['size'];
+            $key = $isAccessory ? 'p_'.$product->id : 'p_'.$product->id.'_s_'.$data['size'];
         }
 
         if ($stock < 1) return back()->with('error', 'Biến thể này hiện đã hết hàng.');
@@ -106,7 +109,7 @@ class CartController extends Controller
     // Giữ tương thích với các URL cũ nếu còn được sử dụng.
     public function update(Request $request, Product $product)
     {
-        $key = 'p_'.$product->id.'_s_'.$data['size'];
+        $key = 'p_'.$product->id;
         return $this->updateItem($request, $key);
     }
 

@@ -104,7 +104,7 @@
                     <div class="d-flex justify-content-between gap-3 mb-3">
                         <div>
                             <div class="fw-semibold">{{ $item['product']->name }}</div>
-                            @if($item['variant'])<small class="text-secondary">Màu: {{ $item['variant']->color }} · Size: {{ $item['size'] }}<br></small>@else<small class="text-secondary">Size: {{ $item['size'] ?: '—' }}<br></small>@endif
+                            @if($item['variant'])<small class="text-secondary">Màu: {{ $item['variant']->color }}@if($item['size']) · Size: {{ $item['size'] }}@endif<br></small>@else<small class="text-secondary">@if($item['size'])Size: {{ $item['size'] }}@endif<br></small>@endif
                             <small class="text-secondary">Số lượng: {{ $item['quantity'] }}</small>
                         </div>
                         <div class="text-nowrap">{{ number_format($item['line_total'], 0, ',', '.') }}₫</div>

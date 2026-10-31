@@ -33,7 +33,7 @@
                                href="{{ route('store.products.show', $item['product']) }}">
                                 {{ $item['product']->name }}
                             </a>
-                            <div class="text-secondary small mt-1">@if($item['variant']) Màu: {{ $item['variant']->color }} · Size: {{ $item['size'] }} · Còn {{ $item['stock'] }} sản phẩm @else Size: {{ $item['size'] ?: "—" }} · Còn {{ $item['stock'] }} sản phẩm @endif</div>
+                            <div class="text-secondary small mt-1">@if($item['variant']) Màu: {{ $item['variant']->color }}@if($item['size']) · Size: {{ $item['size'] }}@endif · Còn {{ $item['stock'] }} sản phẩm @else @if($item['size'])Size: {{ $item['size'] }}@endif · Còn {{ $item['stock'] }} sản phẩm @endif</div>
                             <div class="fw-bold mt-2">{{ number_format($item['product']->price, 0, ',', '.') }}₫</div>
                             <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
                                 <form method="POST" action="{{ route('cart.items.update', $item['key']) }}" class="d-flex gap-2">

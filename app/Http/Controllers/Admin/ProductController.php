@@ -139,9 +139,11 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Cập nhật sản phẩm thành công.');
     }
 
-    /** Tạo tự động S/M/L cho mỗi màu, không yêu cầu nhập tồn kho. */
+    /** Phụ kiện: một biến thể cho mỗi màu; đồ ngủ: S/M/L. */
     private function syncColors(Product $product, array $rows): void
     {
+        $product->load('category');
+        $isAccessory = str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện');
         $existing = $product->variants()->get();
         $byColor = $existing->groupBy(fn($v) => mb_strtolower(trim($v->color)));
         $seen = [];
@@ -160,14 +162,15 @@ class ProductController extends Controller
                     $images[$field] = request()->file("colors.$i.$field")->store('products/variants', 'public');
                 }
             }
-            foreach (['S', 'M', 'L'] as $size) {
+            foreach ($isAccessory ? ['ONE'] : ['S', 'M', 'L'] as $size) {
                 $variant = $old->first(fn($v) => strtoupper(trim($v->size)) === $size);
+                if ($isAccessory && !$variant) $variant = $old->first(); // Giữ ID và ảnh cũ của màu
                 $values = ['color' => $color, 'size' => $size, 'stock' => (int) $product->stock] + $images;
                 if ($variant) $variant->update($values);
                 else $product->variants()->create($values);
             }
             foreach ($old as $variant) {
-                if (!in_array(strtoupper(trim($variant->size)), ['S','M','L'], true)) $variant->delete();
+                if (!in_array(strtoupper(trim($variant->size)), $isAccessory ? ['ONE'] : ['S','M','L'], true)) $variant->delete();
             }
         }
         foreach ($byColor as $key => $items) {

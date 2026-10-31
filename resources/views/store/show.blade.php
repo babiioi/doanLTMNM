@@ -23,7 +23,8 @@
         @else
             <p class="price fs-3">{{ number_format($product->price, 0, ',', '.') }}₫</p>
         @endif
-        <button type="button" class="btn btn-outline-secondary btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">Hướng dẫn chọn size</button>
+        @php $isAccessory = str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện'); @endphp
+        @unless($isAccessory)<button type="button" class="btn btn-outline-secondary btn-sm mb-3" data-bs-toggle="modal" data-bs-target="#sizeGuideModal">Hướng dẫn chọn size</button>@endunless
         <p>{{ $product->description ?: 'Sản phẩm thời trang dành cho phong cách hằng ngày.' }}</p>
 
         @php
@@ -45,12 +46,14 @@
                 </select>
             </div>
             @endif
+            @unless($isAccessory)
             <div class="mb-3"><label class="form-label fw-semibold">Chọn kích thước</label>
                 <div class="d-flex gap-2" id="size-buttons">
                     @foreach(['S','M','L'] as $sz)<button type="button" class="btn btn-outline-dark rounded-3 px-4 size-choice" data-size="{{ $sz }}" aria-pressed="false">{{ $sz }}</button>@endforeach
                 </div>
             </div>
-            <input type="hidden" name="size" id="chosen-size" required>
+            @endunless
+            <input type="hidden" name="size" id="chosen-size" value="" >
             <input type="hidden" name="variant_id" id="variant-id">
             <p class="text-secondary small">Tồn kho chung: {{ $product->stock }} sản phẩm</p>
             <div class="d-flex flex-wrap align-items-end gap-3">
@@ -65,6 +68,7 @@
             const colors = {{ Illuminate\Support\Js::from($colorData) }};
             const fallback = {{ Illuminate\Support\Js::from($product->image ? asset('storage/'.$product->image) : null) }};
             const stock = {{ (int)$product->stock }};
+            const isAccessory = {{ $isAccessory ? 'true' : 'false' }};
             const select = document.getElementById('variant-color');
             const chosenSize = document.getElementById('chosen-size');
             const variantId = document.getElementById('variant-id');
@@ -86,8 +90,8 @@
             }
             function refresh() {
                 const color=select ? colors.find(c=>c.name===select.value) : null;
-                variantId.value=color ? (color.ids[chosenSize.value] || '') : '';
-                button.disabled=stock<1 || !chosenSize.value || (!!select && !color) || (!!color && !variantId.value);
+                variantId.value=color ? (isAccessory ? (color.ids['ONE'] || Object.values(color.ids)[0] || '') : (color.ids[chosenSize.value] || '')) : '';
+                button.disabled=stock<1 || (!isAccessory && !chosenSize.value) || (!!select && !color) || (!!color && !variantId.value);
                 images(color ? color.images : []);
             }
             document.querySelectorAll('.size-choice').forEach(b=>b.addEventListener('click',()=>{
@@ -103,5 +107,7 @@
         </script>
     </div>
 </div>
+@unless($isAccessory)
 <div class="modal fade" id="sizeGuideModal" tabindex="-1" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h5 class="modal-title">Hướng dẫn chọn size</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body"><img src="{{ asset('images/mo-mang-size-guide.png') }}" class="img-fluid w-100" alt="Bảng hướng dẫn chọn size"></div></div></div></div>
+@endunless
 @endsection
