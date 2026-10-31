@@ -53,9 +53,12 @@ Route::middleware('auth')->group(function () {
         ->name('profile.destroy');
     Route::get('/checkout', [CheckoutController::class, 'index'])
     ->name('checkout.index');
+
+    Route::post('/checkout/apply-coupon', [CheckoutController::class, 'applyCoupon'])
+        ->name('checkout.apply-coupon');
     
     Route::post('/checkout/save-shipping-info', [CheckoutController::class, 'saveShippingInfo'])
-    ->name('checkout.save-shipping-info');
+        ->name('checkout.save-shipping-info');
 
     Route::post('/checkout', [CheckoutController::class, 'store'])
         ->name('checkout.store');
