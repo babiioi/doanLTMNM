@@ -35,7 +35,7 @@
 
         <div>
             <div class="text-secondary small mb-2">Nội dung góp ý</div>
-            <div class="p-3 rounded-3" style="background:#F7F3EE; white-space:pre-line">
+            <div class="p-3 rounded-3" style="background:#F7F3EE">
                 {{ $contactMessage->message }}
             </div>
         </div>

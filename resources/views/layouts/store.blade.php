@@ -170,7 +170,7 @@
 <body>
 <nav class="navbar navbar-expand-lg bg-white border-bottom sticky-top fashion-navbar">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('store.home') }}"><img src="{{ asset('images/mo-mang-logo.png') }}" alt="Mơ Màng" style="height:82px;width:auto;max-width:160px;object-fit:contain"></a>
+        <a class="navbar-brand" href="{{ route('store.home') }}"><img src="{{ asset('images/mo-mang-logo.png') }}" alt="Mơ Màng" style="height:50px;width:auto;max-width:160px;object-fit:contain"></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-label="Mở menu"><span class="navbar-toggler-icon"></span></button>
         <div class="collapse navbar-collapse" id="mainNav">
             <ul class="navbar-nav fashion-main-nav">
