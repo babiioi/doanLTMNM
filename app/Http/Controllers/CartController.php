@@ -129,7 +129,7 @@ class CartController extends Controller
     public function checkoutSelected(Request $request){
     $data = $request->validate([
         'selected' => ['required', 'array', 'min:1'],
-        'selected.*' => ['required', 'integer', 'distinct'],
+        'selected.*' => ['required', 'string', 'distinct'],
     ], [
         'selected.required' => 'Vui lòng chọn ít nhất một sản phẩm.',
         'selected.min' => 'Vui lòng chọn ít nhất một sản phẩm.',
