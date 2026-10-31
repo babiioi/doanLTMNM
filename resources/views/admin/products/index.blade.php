@@ -50,7 +50,7 @@
     <table class="table table-hover align-middle mb-0 product-table">
         <thead class="table-light">
             <tr>
-                <th>#</th>
+                <th></th>
                 <th>Ảnh</th>
                 <th>Tên sản phẩm</th>
                 <th>Danh mục</th>

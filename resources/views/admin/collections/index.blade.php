@@ -21,7 +21,7 @@
     <table class="table table-hover align-middle mb-0 collection-table">
         <thead class="table-light">
             <tr>
-                <th>SL</th>
+                <th></th>
                 <th>Tên bộ sưu tập</th>
                 <th>Đường dẫn</th>
                 <th>Số sản phẩm</th>

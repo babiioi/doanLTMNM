@@ -27,7 +27,7 @@
     <table class="table table-hover align-middle mb-0">
         <thead class="table-light">
             <tr>
-                <th class="text-center fw-bold">#</th>
+                <th class="text-center fw-bold"></th>
                 <th class="text-center fw-bold">Tên danh mục</th>
                 <th class="text-center fw-bold">Mô tả</th>
                 <th class="text-center fw-bold">Số sản phẩm</th>
