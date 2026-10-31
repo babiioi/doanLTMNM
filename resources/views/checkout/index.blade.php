@@ -184,41 +184,28 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     
+    
     async function getJson(url, options = {}) {
         const response = await fetch(url, options);
-        const text = await response.text();
-
-        let data;
-
-        try {
-            data = JSON.parse(text);
-        } catch {
-            throw new Error(
-                'Máy chủ trả về HTML thay vì JSON. Hãy kiểm tra lỗi Laravel hoặc đoạn dd() trong CheckoutController.php.'
-            );
-        }
+        const data = await response.json();
 
         if (!response.ok) {
-            const detail = data.ghn_response
-                ? JSON.stringify(data.ghn_response)
-                : '';
-
-            throw new Error(
-                (data.message || 'Không tải được dữ liệu GHN.') +
-                (detail ? ' Chi tiết: ' + detail : '')
-            );
+            throw new Error(data.message || 'Không tải được dữ liệu GHN.');
         }
 
+        // API tính phí trả dữ liệu trực tiếp.
         if (url.includes('/fee')) {
             return data;
         }
 
+        // API tỉnh, huyện, phường trả dữ liệu trong data.data.
         if (data.code !== 200) {
             throw new Error(data.message || 'Không tải được dữ liệu GHN.');
         }
 
         return data.data;
     }
+
 
 
     function fillSelect(select, items, valueKey, labelKey, placeholder) {

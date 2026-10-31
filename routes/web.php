@@ -19,6 +19,11 @@ Route::view('/gioi-thieu', 'store.about')->name('store.about');
 Route::view('/lien-he', 'store.contact')->name('store.contact');
 
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+
+Route::post('/cart/checkout-selected', [CartController::class, 'checkoutSelected'])
+    ->middleware('auth')
+    ->name('cart.checkout-selected');
+
 Route::post('/cart/{product}', [CartController::class, 'store'])->name('cart.store');
 Route::patch('/cart/{product}', [CartController::class, 'update'])->name('cart.update');
 Route::delete('/cart/{product}', [CartController::class, 'destroy'])->name('cart.destroy');

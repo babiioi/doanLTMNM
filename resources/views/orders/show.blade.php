@@ -14,7 +14,7 @@
         $bankAccount = config('services.vietqr.account');
         $bankName = config('services.vietqr.account_name');
         $qrUrl = $bankBin && $bankAccount
-            ? 'https://img.vietqr.io/image/'.rawurlencode($bankBin).'-'.rawurlencode($bankAccount).'-compact2.png?amount='.urlencode((string) (int) $order->total).'&addInfo='.urlencode('Thanh toan '.$order->order_number).'&accountName='.urlencode($bankName ?? '')
+            ? 'https://img.vietqr.io/image/'.rawurlencode($bankBin).'-'.rawurlencode($bankAccount).'-compact2.png?amount='.urlencode((string) (int) $order->total).'&addInfo='.urlencode($order->order_number).'&accountName='.urlencode($bankName ?? '')
             : null;
     @endphp
     <div class="alert alert-info">
