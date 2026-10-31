@@ -7,18 +7,16 @@ return [
         'account_name' => env('VIETQR_ACCOUNT_NAME'),
     ],
 
-
-    /*
-    |--------------------------------------------------------------------------
-    | Third Party Services
-    |--------------------------------------------------------------------------
-    |
-    | This file is for storing the credentials for third party services such
-    | as Mailgun, Postmark, AWS and more. This file provides the de facto
-    | location for this type of information, allowing packages to have
-    | a conventional file to locate the various service credentials.
-    |
-    */
+    'ghn' => [
+    'token' => env('GHN_TOKEN'),
+    'shop_id' => env('GHN_SHOP_ID'),
+    'api_url' => env(
+        'GHN_API_URL',
+        'https://online-gateway.ghn.vn'
+    ),
+    'service_type_id' => 2,
+    'default_weight' => 500,
+    ],
 
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),

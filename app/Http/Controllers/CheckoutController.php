@@ -10,13 +10,17 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use RuntimeException;
+use Illuminate\Support\Facades\Http;
 
 class CheckoutController extends Controller
 {
     public function index()
     {
         $cart = session('cart', []);
-        if (empty($cart)) return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống.');
+if (empty($cart)) {
+    return redirect()->route('cart.index')
+        ->with('error', 'Giỏ hàng của bạn đang trống.');
+}
 
         $items = collect($cart)->map(function ($quantity, $key) {
             [$type, $id, $size] = $this->decodeKey((string) $key);
@@ -66,6 +70,18 @@ class CheckoutController extends Controller
         if (empty($cart)) return redirect()->route('cart.index')->with('error', 'Giỏ hàng của bạn đang trống.');
 
         try {
+            $shipping = session('checkout_shipping');
+
+            if (
+                !$shipping ||
+                !isset($shipping['fee'], $shipping['district_id'], $shipping['ward_code'])
+            ) {
+                return redirect()->route('checkout.index')
+                    ->with('error', 'Vui lòng tính phí vận chuyển trước khi đặt hàng.');
+            }
+
+            $shippingFee = (float) $shipping['fee'];
+
             $order = DB::transaction(function () use ($cart, $data, $request) {
                 $orderLines = [];
                 $subtotal = 0;
@@ -110,6 +126,7 @@ class CheckoutController extends Controller
                     'note' => $data['note'] ?? null,
                     'subtotal' => $subtotal,
                     'total' => $subtotal,
+                    'shipping_fee' => $shippingFee,
                     'payment_method' => $data['payment_method'],
                     'payment_status' => 'unpaid',
                     'status' => 'pending',
@@ -137,8 +154,10 @@ class CheckoutController extends Controller
             return redirect()->route('cart.index')->with('error', $exception->getMessage());
         }
 
-        session()->forget('cart');
-        return redirect()->route('orders.show', $order)->with('success', 'Đặt hàng thành công. Mã đơn hàng: '.$order->order_number);
+        session()->forget(['cart', 'checkout_shipping']);
+
+        return redirect()->route('orders.show', $order)
+            ->with('success', 'Đặt hàng thành công. Mã đơn hàng: '.$order->order_number);
     }
 
     private function decodeKey(string $key): array
@@ -147,5 +166,172 @@ class CheckoutController extends Controller
         if (preg_match('/^p_(\\d+)(?:_s_(S|M|L))?$/', $key, $m)) return ['product', (int) $m[1], $m[2] ?? null];
         if (ctype_digit($key)) return ['product', (int) $key, null];
         return ['invalid', 0, null];
+    }
+    
+    // Lấy danh sách tỉnh/thành theo danh mục GHN dùng để tính phí.
+    public function provinces()
+    {
+        return $this->ghnGet('/shiip/public-api/master-data/province');
+    }
+
+    // Lấy quận/huyện theo tỉnh/thành.
+    public function districts(int $provinceId)
+    {
+        return $this->ghnGet(
+            '/shiip/public-api/master-data/district',
+            ['province_id' => $provinceId]
+        );
+    }
+
+    // Lấy phường/xã theo quận/huyện.
+    public function wards(int $districtId)
+    {
+        return $this->ghnGet(
+            '/shiip/public-api/master-data/ward',
+            ['district_id' => $districtId]
+        );
+    }
+
+    // Hàm dùng chung để gọi API GHN.
+    private function ghnGet(string $endpoint, array $params = [])
+    {
+        $response = Http::withHeaders([
+            'Token' => config('services.ghn.token'),
+            'ShopId' => (string) config('services.ghn.shop_id'),
+        ])->get(
+            rtrim(config('services.ghn.api_url'), '/') . $endpoint,
+            $params
+        );
+
+        if (!$response->successful() || $response->json('code') != 200) {
+            return response()->json([
+                'message' => 'GHN báo lỗi: ' . (
+                    $response->json('message')
+                    ?? $response->body()
+                    ?? 'Không xác định'
+                ),
+                'ghn_code' => $response->json('code'),
+                'ghn_response' => $response->json(),
+            ], 502);
+        }
+
+        return response()->json($response->json());
+    }
+
+    // Tính phí vận chuyển GHN.
+    public function shippingFee(Request $request)
+    {
+        $data = $request->validate([
+            'to_district_id' => ['required', 'integer', 'min:1'],
+            'to_ward_code' => ['required', 'string', 'max:20'],
+        ]);
+
+        $cart = session('cart', []);
+
+        if (empty($cart)) {
+            return response()->json([
+                'message' => 'Giỏ hàng đang trống.',
+            ], 422);
+        }
+
+        $products = Product::whereIn('id', array_keys($cart))->get();
+
+        $weight = 0;
+        $subtotal = 0;
+
+        foreach ($cart as $productId => $quantity) {
+            $product = $products->firstWhere('id', $productId);
+
+            if (!$product) {
+                return response()->json([
+                    'message' => 'Có sản phẩm không còn tồn tại trong giỏ hàng.',
+                ], 422);
+            }
+
+            $quantity = (int) $quantity;
+
+            if ($quantity < 1) {
+                return response()->json([
+                    'message' => 'Số lượng sản phẩm không hợp lệ.',
+                ], 422);
+            }
+
+            // Tạm tính mỗi sản phẩm nặng 500 gram.
+            $weight += $quantity * (int) config('services.ghn.default_weight', 500);
+            $subtotal += (float) $product->price * $quantity;
+        }
+
+        $payload = [
+            'to_district_id' => (int) $data['to_district_id'],
+            'to_ward_code' => $data['to_ward_code'],
+            'service_type_id' => (int) config('services.ghn.service_type_id', 2),
+            'weight' => max(1, $weight),
+            'insurance_value' => (int) round($subtotal),
+        ];
+
+        try {
+            $response = Http::timeout(15)->withHeaders([
+                'Token' => config('services.ghn.token'),
+                'ShopId' => (string) config('services.ghn.shop_id'),
+            ])->post(
+                rtrim(config('services.ghn.api_url'), '/') .
+                    '/shiip/public-api/v2/shipping-order/fee',
+                $payload
+            );
+
+            if (!$response->successful() || $response->json('code') != 200) {
+                return response()->json([
+                    'message' => 'GHN không tính được phí cho địa chỉ này. Vui lòng kiểm tra địa chỉ hoặc cấu hình GHN.',
+                ], 502);
+            }
+
+            $fee = (int) $response->json('data.total');
+
+            session([
+                'checkout_shipping' => [
+                    'district_id' => (int) $data['to_district_id'],
+                    'ward_code' => $data['to_ward_code'],
+                    'fee' => $fee,
+                ],
+            ]);
+
+            return response()->json([
+                'shipping_fee' => $fee,
+                'formatted_fee' => number_format($fee, 0, ',', '.') . '₫',
+            ]);
+        } catch (\Throwable $exception) {
+            report($exception);
+
+            return response()->json([
+                'message' => 'Không kết nối được GHN. Vui lòng thử lại.',
+            ], 502);
+        }
+    }
+
+    public function saveShippingInfo(Request $request)
+    {
+        $data = $request->validate([
+            'customer_name' => ['required', 'string', 'max:120'],
+            'customer_phone' => ['required', 'string', 'max:30', 'regex:/^[0-9+\s().-]{8,30}$/'],
+            'street_address' => ['required', 'string', 'max:300'],
+            'shipping_address' => ['required', 'string', 'max:500'],
+            'province_id' => ['required', 'integer', 'min:1'],
+            'district_id' => ['required', 'integer', 'min:1'],
+            'ward_code' => ['required', 'string', 'max:20'],
+        ]);
+
+        $request->user()->update([
+            'name' => $data['customer_name'],
+            'phone' => $data['customer_phone'],
+            'street_address' => $data['street_address'],
+            'shipping_address' => $data['shipping_address'],
+            'shipping_province_id' => $data['province_id'],
+            'shipping_district_id' => $data['district_id'],
+            'shipping_ward_code' => $data['ward_code'],
+        ]);
+
+        return response()->json([
+            'message' => 'Đã lưu thông tin nhận hàng thành công.',
+        ]);
     }
 }
