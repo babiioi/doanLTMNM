@@ -27,4 +27,12 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class);
     }
+
+    public function getCurrentPriceAttribute(): float
+    {
+        if ($this->sale_price !== null && (float) $this->sale_price < (float) $this->price) {
+            return (float) $this->sale_price;
+        }
+        return (float) $this->price;
+    }
 }

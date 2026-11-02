@@ -38,7 +38,7 @@ class CheckoutController extends Controller
             return [
                 'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện') ? null : ($size ?: $variant?->size),
                 'quantity' => (int) $quantity,
-                'line_total' => (float) $product->price * (int) $quantity,
+                'line_total' => (float) $product->current_price * (int) $quantity,
             ];
         })->filter();
 
@@ -123,7 +123,7 @@ class CheckoutController extends Controller
                 ], 422);
             }
 
-            $subtotal += (float) $product->price * (int) $quantity;
+            $subtotal += (float) $product->current_price * (int) $quantity;
         }
 
         if ($subtotal <= 0) {
@@ -248,7 +248,7 @@ class CheckoutController extends Controller
                         }
                     }
                     $size = str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện') ? null : ($size ?: $variant?->size);
-                    $lineTotal = (float) $product->price * $quantity;
+                    $lineTotal = (float) $product->current_price * $quantity;
                     $subtotal += $lineTotal;
                     $orderLines[] = ['product' => $product, 'variant' => $variant, 'size' => $size, 'quantity' => $quantity, 'line_total' => $lineTotal];
                 }
@@ -308,7 +308,7 @@ class CheckoutController extends Controller
                         'product_name' => $product->name,
                         'product_color' => $variant?->color,
                         'product_size' => $line['size'],
-                        'product_price' => $product->price,
+                        'product_price' => $product->current_price,
                         'quantity' => $line['quantity'],
                         'line_total' => $line['line_total'],
                     ]);
@@ -436,7 +436,7 @@ class CheckoutController extends Controller
             $weight += (int) $quantity *
                 (int) config('services.ghn.default_weight', 500);
 
-            $subtotal += (float) $product->price * (int) $quantity;
+            $subtotal += (float) $product->current_price * (int) $quantity;
         }
 
         // Phí dự phòng khi GHN không hoạt động.
