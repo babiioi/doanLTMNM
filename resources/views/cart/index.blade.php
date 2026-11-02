@@ -52,7 +52,7 @@
                                    form="selectedCheckoutForm"
                                    name="selected[]"
                                    value="{{ $item['key'] }}"
-                                   data-price="{{ $item['product']->price }}"
+                                   data-price="{{ $item['product']->current_price }}"
                                    data-quantity="{{ $item['quantity'] }}"
                                    style="width:20px;height:20px">
                         </div>
@@ -92,7 +92,7 @@
                             </div>
 
                             <div class="fw-bold mt-2">
-                                {{ number_format($item['product']->price, 0, ',', '.') }}₫
+                                {{ number_format($item['product']->current_price, 0, ',', '.') }}₫
                             </div>
                             <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
 

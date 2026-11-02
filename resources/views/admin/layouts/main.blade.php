@@ -418,7 +418,7 @@
 <body>
     <aside class="admin-sidebar">
         <a class="brand" href="{{ route('admin.dashboard') }}">
-            <img src="{{ asset('images/mo-mang-logo.png') }}" alt="Logo Mơ Màng" style="height:70px;width:75px;object-fit:contain;background:#fff;border-radius:10px;padding:3px;flex-shrink:0">
+            <img src="{{ asset('images/mo-mang-logo.png') }}" alt="Logo Mơ Màng" style="height:50px;width:50px;object-fit:contain;background:#fff;border-radius:10px;padding:3px;flex-shrink:0">
             <span>MƠ MÀNG</span>
         </a>
 

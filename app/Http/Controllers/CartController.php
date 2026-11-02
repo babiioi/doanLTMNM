@@ -29,7 +29,7 @@ class CartController extends Controller
             return [
                 'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => ($variant && str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện')) ? null : ($size ?: $variant?->size),
                 'stock' => $stock, 'image' => $image, 'quantity' => (int) $quantity,
-                'line_total' => (float) $product->price * (int) $quantity,
+                'line_total' => (float) $product->current_price * (int) $quantity,
             ];
         })->filter();
         $total = $items->sum('line_total');
