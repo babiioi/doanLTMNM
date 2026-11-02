@@ -110,7 +110,6 @@ class CartController extends Controller
         return redirect()->route('cart.index')->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng.');
     }
 
-    // Giữ tương thích với các URL cũ nếu còn được sử dụng.
     public function update(Request $request, Product $product)
     {
         $key = 'p_'.$product->id;
