@@ -23,9 +23,11 @@ class NewPasswordController extends Controller
     }
 
  
-    @throws ValidationException
-    public function store(Request $request): RedirectResponse
-    {
+    /**
+ * @throws ValidationException
+ */
+public function store(Request $request): RedirectResponse
+{
         $request->validate([
             'token' => ['required'],
             'email' => ['required', 'email'],
