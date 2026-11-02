@@ -18,6 +18,12 @@ class Product extends Model
         'stock' => 'integer',
     ];
 
+    public function adjustStock(int $delta): void
+    {
+        $this->increment('stock', $delta);
+        $this->variants()->update(['stock' => $this->stock]);
+    }
+
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);

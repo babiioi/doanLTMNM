@@ -4,10 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\ProductVariant;
+use App\Http\Controllers\Concerns\DecodesCartKey;
+use App\Http\Controllers\Concerns\StoresCart;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
+    use DecodesCartKey, StoresCart;
+
     public function index()
     {
         $cart = session('cart', []);
@@ -29,7 +33,7 @@ class CartController extends Controller
             return [
                 'key' => $key, 'product' => $product, 'variant' => $variant, 'size' => ($variant && str_contains(mb_strtolower($product->category?->name ?? ''), 'phụ kiện')) ? null : ($size ?: $variant?->size),
                 'stock' => $stock, 'image' => $image, 'quantity' => (int) $quantity,
-                'line_total' => (float) $product->current_price * (int) $quantity,
+                'line_total' => $product->current_price * (int) $quantity,
             ];
         })->filter();
         $total = $items->sum('line_total');
@@ -70,7 +74,7 @@ class CartController extends Controller
         }
         if ($totalForProduct + (int) $data['quantity'] > $stock) return back()->with('error', 'Tổng số lượng các màu/size vượt tồn kho chung. Hiện còn '.$stock.' sản phẩm.');
         $cart[$key] = $newQuantity;
-        session(['cart' => $cart]);
+        $this->saveCart($cart);
         return redirect()->route('cart.index')->with('success', 'Đã thêm sản phẩm vào giỏ hàng.');
     }
 
@@ -94,7 +98,7 @@ class CartController extends Controller
         }
         if ($otherQuantity + (int) $data['quantity'] > $stock) return back()->with('error', 'Tổng số lượng các màu/size vượt tồn kho chung.');
         $cart[$key] = (int) $data['quantity'];
-        session(['cart' => $cart]);
+        $this->saveCart($cart);
         return back()->with('success', 'Đã cập nhật giỏ hàng.');
     }
 
@@ -102,7 +106,7 @@ class CartController extends Controller
     {
         $cart = session('cart', []);
         unset($cart[$key]);
-        session(['cart' => $cart]);
+        $this->saveCart($cart);
         return redirect()->route('cart.index')->with('success', 'Đã xóa sản phẩm khỏi giỏ hàng.');
     }
 
@@ -116,15 +120,6 @@ class CartController extends Controller
     public function destroy(Product $product)
     {
         return $this->destroyItem('p_'.$product->id);
-    }
-
-    private function decodeKey(string $key): array
-    {
-        if (preg_match('/^v_(\d+)(?:_s_(S|M|L))?$/', $key, $m)) return ['variant', (int) $m[1], $m[2] ?? null];
-        if (preg_match('/^p_(\d+)(?:_s_(S|M|L))?$/', $key, $m)) return ['product', (int) $m[1], $m[2] ?? null];
-        // Giỏ hàng tạo từ phiên bản cũ dùng trực tiếp product_id làm khóa.
-        if (ctype_digit($key)) return ['product', (int) $key, null];
-        return ['invalid', 0, null];
     }
     public function checkoutSelected(Request $request){
     $data = $request->validate([

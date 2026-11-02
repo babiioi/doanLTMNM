@@ -72,6 +72,8 @@
 
 
                 <input type="hidden" name="shipping_address" id="shipping_address">
+                <input type="hidden" name="district_id" id="district_id_input">
+                <input type="hidden" name="ward_code" id="ward_code_input">
 
 
                 <div class="mb-4">
@@ -189,6 +191,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const ward = document.getElementById('ward');
     const street = document.getElementById('street_address');
     const address = document.getElementById('shipping_address');
+    const districtInput = document.getElementById('district_id_input');
+    const wardInput = document.getElementById('ward_code_input');
     const fee = document.getElementById('shipping-fee');
     const total = document.getElementById('grand-total');
     const message = document.getElementById('shipping-message');
@@ -230,7 +234,6 @@ document.addEventListener('DOMContentLoaded', function () {
         updateGrandTotal();
         message.textContent = '';
     }
-
     
     
     async function getJson(url, options = {}) {
@@ -272,6 +275,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const districtName = district.selectedOptions[0]?.text || '';
         const wardName = ward.selectedOptions[0]?.text || '';
         const streetName = street.value.trim();
+        districtInput.value = district.value;
+        wardInput.value = ward.value;
 
         address.value = [
             streetName,

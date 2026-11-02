@@ -30,8 +30,6 @@ class StorefrontController extends Controller
                 ->get();
         }
 
-        // Sản phẩm bán chạy: xếp theo tổng số lượng đã đặt trong đơn hàng.
-        // Nếu chưa có dữ liệu đơn hàng, dùng sản phẩm mới làm nội dung thay thế.
         $bestSellerIds = [];
         if (DB::getSchemaBuilder()->hasTable('order_items')) {
             $bestSellerIds = DB::table('order_items')

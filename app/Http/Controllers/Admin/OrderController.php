@@ -68,7 +68,7 @@ class OrderController extends Controller
                         }
                         if ($item->product_id) {
                             $product = Product::whereKey($item->product_id)->lockForUpdate()->first();
-                            if ($product) $product->increment('stock', $item->quantity);
+                            if ($product) $product->adjustStock((int) $item->quantity);
                         }
                     }
                 }
